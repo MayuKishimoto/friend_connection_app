@@ -12,7 +12,11 @@ class FeedsController < ApplicationController
 
   # GET /feeds/new
   def new
-    @feed = Feed.new
+    if params[:back]
+      @feed = Feed.new(feed_params)
+    else
+      @feed = Feed.new
+    end
   end
 
   # GET /feeds/1/edit
@@ -21,8 +25,7 @@ class FeedsController < ApplicationController
 
   # POST /feeds or /feeds.json
   def create
-    @feed = Feed.new(feed_params)
-
+    @feed = current_user.feeds.build(feed_params)
     respond_to do |format|
       if @feed.save
         format.html { redirect_to feed_url(@feed), notice: "Feed was successfully created." }
@@ -57,6 +60,11 @@ class FeedsController < ApplicationController
     end
   end
 
+  def confirm
+    @feed = current_user.feeds.build(feed_params)
+    render :new if @feed.invalid?
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_feed
@@ -65,6 +73,6 @@ class FeedsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def feed_params
-      params.require(:feed).permit(:image, :content)
+      params.require(:feed).permit(:image, :content, :image_cache)
     end
 end
